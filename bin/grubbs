@@ -142,21 +142,21 @@ def handle_options
     opt.banner =  "#{MYNAME} - detect outliers in a row or column of data\n"
     opt.banner << "Usage: #{MYNAME} [options] [filename]"
   
-    opt.on('-p','--pair','report file sizes in the index [false]') do
+    opt.on('-l','--level=FLOAT',Float,'set float to FLOAT [5]') do |v|
+      [ 0.1, 0.5, 1.0, 2.5, 5.0, 10.0 ].index(v) or quit("Illegal value for level")
+      o.level = v
+    end
+    opt.on('-c','--cycles=INT',Integer,'set number to INT [1]') do |v|
+        o.cycles = v
+    end
+    opt.on('-p','--pair','if no outliers are found, test lowest and highest pairs [false]') do
         o.pair = true
     end
     opt.on('-n','--nlimit=INT',Integer,'minimum number of observations for pair detection') do |v|
         o.nlimit = v
     end
-    opt.on('-c','--cycles=INT',Integer,'set number to INT [1]') do |v|
-        o.cycles = v
-    end
     opt.on('-k','--column=INT',Integer,'set column to INT [1]') do |v|
         o.column = v-1
-    end
-    opt.on('-l','--level=FLOAT',Float,'set float to FLOAT [5]') do |v|
-      [ 0.1, 0.5, 1.0, 2.5, 5.0, 10.0 ].index(v) or quit("Illegal value for level")
-      o.level = v
     end
     opt.on('-t','--test',"run the examples from Grubbs and Beck's publication and exit") do
         def pr
