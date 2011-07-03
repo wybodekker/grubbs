@@ -3,21 +3,27 @@
 =begin rdoc
 == grubbs - detect outliers in a row or column of data
 === Synopsis
-        grubbs [options] [filename|values]
+    grubbs [options] [filename|values]
 
-        Options:
-        -p, --pair           if no outliers are found, test lowest and highest pairs [false]
-        -c, --cycles=INT     set number of cycles to INT [1]
-        -k, --column=INT     set column to INT [1]
-        -l, --level=FLOAT    set confidence level to FLOAT% [5]
-        -n, --nlimit=INT     limit for pair detection [14]
-        -t, --test           run the examples from Grubbs and Beck's publication and exit
-        -h, --help           print this help and exit
-        -v, --verbose        show intermediate results (experts only)
-        -V, --version        print version of this script and exit
+    Options:
+    -l, --level=FLOAT       set percent confidence level to FLOAT [5]
+    -c, --cycles=INT        set number of cycles to INT [1]
+    -p, --pair              if no outliers are found, test lowest and highest pairs [false]
+    -n, --nlimit=INT        minimum number of observations for pair detection [14]
+    -k, --column=INT        read data in columns and find outliers in column INT
+    -t, --test              run the examples from Grubbs and Beck's publication and exit
+    -h, --help              print this help and exit
+    -v, --verbose=INT       set verbosity to INT [0]
+    -V, --version           print version and exit
 
-        Note: negative numbers are interpreted as options (and therefore leads to an error 
-        message); this can be prevented by using -- as the last option.
+Note::
+  negative numbers are interpreted as options (and therefore leads to an error message);
+  this can be prevented by using -- as the last option.
+Note::
+  long options and their arguments can be separated by either an = or a space;
+  short options must be separated from their arguments with any amount of white space,
+  including none.
+
 === Description
 *grubbs* is a driver for the _grubbs_ routine in <i>ringstats.rb</i>; It
 detects outliers in either a row of data given on the command line or in
@@ -41,18 +47,21 @@ When the <tt>--pair</tt> option is not used, the script (as well as the
 underlying routine) finds at most one outlier per cycle.
 With the  <tt>--pair</tt> option two outliers may be found per cycle. 
 
-=== Options
+=== Exit value
+The exit value of the script is the number of outliers found or, in case of a lethal 
+error, 100.
 
-<tt>--level</tt>=<i>float</i>::
+=== Options
+<tt>--level=<i>float</i></tt>::
   percent confidence level for outlier testing; default: 5;
   the only values allowed are 0.1, 0.5, 1, 2.5, 5, and 10.
-<tt>--column</tt>=<i>int</i>::
+<tt>--column=<i>int</i></tt>::
   without this option, data to be tested are read from the command line.
   If the option is used, data are expected on standard input,
   and _int_ is the column number of that file to be tested,
   where column 1 is the first column.
   Columns must be separated by any amount of whitespace.
-<tt>--cycles</tt>=<i>int</i>::
+<tt>--cycles=<i>int</i></tt>::
   the number of times (default: 1) the data are cycled through the outlier detector
 <tt>--pair</tt>::
   test lowest and highest pairs (default: false).
@@ -61,7 +70,10 @@ With the  <tt>--pair</tt> option two outliers may be found per cycle.
 <tt>--test</tt>::
   runs the script with various tests taken from Grubbs and Beck's publications and then exits
 <tt>--verbose</tt>::
-  if set, intermediate results per cycle are printed. Default: false.
+  higher values show more intermediate results. Experts only. Possible values:
+  0:: show result only
+  1:: show data and options used 
+  2:: show intermediate results for each cycle
 <tt>--version</tt>::
   prints the script's version, then exits.
 <tt>--help</tt>::
@@ -134,33 +146,32 @@ def handle_options
     :level     => 5,
     :cycles    => 1,
     :test      => false,
-    :verbose   => false,
+    :verbose   => 0,
     :column    => nil,
     :version   => Version
-)
+  )
   ARGV.options do |opt|
     opt.banner =  "#{MYNAME} - detect outliers in a row or column of data\n"
     opt.banner << "Usage: #{MYNAME} [options] [filename]"
   
-    opt.on('-l','--level=FLOAT',Float,'set float to FLOAT [5]') do |v|
-      [ 0.1, 0.5, 1.0, 2.5, 5.0, 10.0 ].index(v) or quit("Illegal value for level")
+    opt.on('-l','--level=FLOAT',Float,'set percent confidence level to FLOAT [5]') do |v|
       o.level = v
     end
-    opt.on('-c','--cycles=INT',Integer,'set number to INT [1]') do |v|
+    opt.on('-c','--cycles=INT',Integer,'set number of cycles to INT [1]') do |v|
         o.cycles = v
     end
     opt.on('-p','--pair','if no outliers are found, test lowest and highest pairs [false]') do
         o.pair = true
     end
-    opt.on('-n','--nlimit=INT',Integer,'minimum number of observations for pair detection') do |v|
+    opt.on('-n','--nlimit=INT',Integer,'minimum number of observations for pair detection [14]') do |v|
         o.nlimit = v
     end
-    opt.on('-k','--column=INT',Integer,'set column to INT [1]') do |v|
+    opt.on('-k','--column=INT',Integer,'read data in columns and find outliers in column INT') do |v|
         o.column = v-1
     end
     opt.on('-t','--test',"run the examples from Grubbs and Beck's publication and exit") do
         def pr
-          puts('-'*40,@m,sys($0 + " -v -l #{@l} -c #{@c} -n #{@n} #{@p ? '-p' : ''} -- " + @a).output)
+          puts('-'*40,@m,sys($0 + " -v 1 -l #{@l} -c #{@c} -n #{@n} #{@p ? '-p' : ''} -- " + @a).output)
         end
         puts ERB.new(DATA.read,nil,'%').result(binding)
         exit
@@ -169,8 +180,9 @@ def handle_options
         puts opt.help
         exit
     end
-    opt.on('-v','--verbose','set verbose') do
-        o.verbose = true end
+    opt.on('-v','--verbose=INT','set verbosity to INT; default: 0') do |v|
+        o.verbose = v.to_i
+    end
     opt.on('-V','--version','print version and exit') do
         puts Version
         exit
@@ -192,7 +204,7 @@ else
   data = o.args
   data.empty? && !o.column and quit("You forgot to set the --column option",0)
 end
-data.grubbs(o.level,o.pair,o.cycles,o.verbose ? 2 : 1, o.nlimit)
+exit(data.grubbs(o.level,o.pair,o.cycles,o.verbose+1,o.nlimit).size)
 __END__
 % @m = "lowest (-100) is not an outlier at the 10% level:"
 % @l,@c,@p,@n = 10,1,false,14
