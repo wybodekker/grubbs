@@ -1,18 +1,23 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 
 =begin rdoc
 == grubbs - detect outliers in a row or column of data
 === Synopsis
-	grubbs [options] [filename|values]
+        grubbs [options] [filename|values]
 
-	Options:
-	-p, --pair           if no outliers are found, test lowest and highest pairs [false]
-	-c, --cycles=INT     set number of cycles to INT [1]
-	-k, --column=INT     set column to INT [1]
-	-l, --level=FLOAT    set confidence level to FLOAT% [5]
-	-h, --help           print this help and exit
-	-v, --verbose        show intermediate results (experts only)
-	-V, --version        print version of this script and exit
+        Options:
+        -p, --pair           if no outliers are found, test lowest and highest pairs [false]
+        -c, --cycles=INT     set number of cycles to INT [1]
+        -k, --column=INT     set column to INT [1]
+        -l, --level=FLOAT    set confidence level to FLOAT% [5]
+        -n, --nlimit=INT     limit for pair detection [14]
+        -t, --test           run the examples from Grubbs and Beck's publication and exit
+        -h, --help           print this help and exit
+        -v, --verbose        show intermediate results (experts only)
+        -V, --version        print version of this script and exit
+
+        Note: negative numbers are interpreted as options (and therefore leads to an error 
+        message); this can be prevented by using -- as the last option.
 === Description
 *grubbs* is a driver for the _grubbs_ routine in <i>ringstats.rb</i>; It
 detects outliers in either a row of data given on the command line or in
@@ -32,7 +37,8 @@ For example:
     $ grubbs 2 3 2 3 2 4 2 3 2 3 5.1 5.2 2 3 2 3 2 --pair
     outliers: 11 => 5.1, 12 => 5.2
 
-When the <tt>--pair</tt> option is not used, the script (as well as the underlying routine) finds at most one outlier per cycle. 
+When the <tt>--pair</tt> option is not used, the script (as well as the
+underlying routine) finds at most one outlier per cycle.
 With the  <tt>--pair</tt> option two outliers may be found per cycle. 
 
 === Options
@@ -50,6 +56,10 @@ With the  <tt>--pair</tt> option two outliers may be found per cycle.
   the number of times (default: 1) the data are cycled through the outlier detector
 <tt>--pair</tt>::
   test lowest and highest pairs (default: false).
+<tt>--nlimit</tt>::
+  minimum number of observations for pair detection
+<tt>--test</tt>::
+  runs the script with various tests taken from Grubbs and Beck's publications and then exits
 <tt>--verbose</tt>::
   if set, intermediate results per cycle are printed. Default: false.
 <tt>--version</tt>::
@@ -75,29 +85,29 @@ With the  <tt>--pair</tt> option two outliers may be found per cycle.
     outliers: 6 => 6, 4 => 6
 
     $ cat test
-    16		16	16
-    12.4	12.4    12.4
-    18.5	18.5    18.5
-    18.2	18.2    18.2
-    30.0	131.0   133.0
-    30.0	132.0   134.0
-    21.8	21.8    21.8
-    20.7	20.7    20.7
-    20.5	20.5    20.5
-    21.5	21.5    21.5
-    23.4	23.4    23.4
-    12.5	12.5
-    16.0	16.0
-    19.0	19.0
-    17.0	17.0
-    13.4	13.4
-    22.8	22.8
-    20.1	20.1
-    14.5	14.5
-    14.4	14.4
-    19.8	19.8
-    18.5	18.5
-    11.3	11.3
+    16          16      16
+    12.4        12.4    12.4
+    18.5        18.5    18.5
+    18.2        18.2    18.2
+    30.0        131.0   133.0
+    30.0        132.0   134.0
+    21.8        21.8    21.8
+    20.7        20.7    20.7
+    20.5        20.5    20.5
+    21.5        21.5    21.5
+    23.4        23.4    23.4
+    12.5        12.5
+    16.0        16.0
+    19.0        19.0
+    17.0        17.0
+    13.4        13.4
+    22.8        22.8
+    20.1        20.1
+    14.5        14.5
+    14.4        14.4
+    19.8        19.8
+    18.5        18.5
+    11.3        11.3
     $ grubbs --cy=2 -k 2 test
         outliers: 6 => 132.0, 5 => 131.0
     $ grubbs --cycles=2 --column=1 test
@@ -113,14 +123,17 @@ $Id$
 
 require 'scriptingutils'
 require 'ringstats'
+require 'erb'
 
 Version = 1.0
 
 def handle_options
   o = OpenStruct.new( 
     :pair      => false,
+    :nlimit    => 14,
     :level     => 5,
     :cycles    => 1,
+    :test      => false,
     :verbose   => false,
     :column    => nil,
     :version   => Version
@@ -129,16 +142,39 @@ def handle_options
     opt.banner =  "#{MYNAME} - detect outliers in a row or column of data\n"
     opt.banner << "Usage: #{MYNAME} [options] [filename]"
   
-    opt.on('-p','--pair','report file sizes in the index [false]') do o.pair = true end
-    opt.on('-c','--cycles=INT',Integer,'set number to INT [1]') do |v| o.cycles = v end
-    opt.on('-k','--column=INT',Integer,'set column to INT [1]') do |v| o.column = v-1 end
+    opt.on('-p','--pair','report file sizes in the index [false]') do
+        o.pair = true
+    end
+    opt.on('-n','--nlimit=INT',Integer,'minimum number of observations for pair detection') do |v|
+        o.nlimit = v
+    end
+    opt.on('-c','--cycles=INT',Integer,'set number to INT [1]') do |v|
+        o.cycles = v
+    end
+    opt.on('-k','--column=INT',Integer,'set column to INT [1]') do |v|
+        o.column = v-1
+    end
     opt.on('-l','--level=FLOAT',Float,'set float to FLOAT [5]') do |v|
       [ 0.1, 0.5, 1.0, 2.5, 5.0, 10.0 ].index(v) or quit("Illegal value for level")
       o.level = v
     end
-    opt.on('-h','--help','print this help and exit') do puts opt.help; exit end
-    opt.on('-v','--verbose','set verbose') do o.verbose = true end
-    opt.on('-V','--version','print version and exit') do puts Version; exit end
+    opt.on('-t','--test',"run the examples from Grubbs and Beck's publication and exit") do
+        def pr
+          puts('-'*40,@m,sys($0 + " -v -l #{@l} -c #{@c} -n #{@n} #{@p ? '-p' : ''} -- " + @a).output)
+        end
+        puts ERB.new(DATA.read,nil,'%').result(binding)
+        exit
+    end
+    opt.on('-h','--help','print this help and exit') do
+        puts opt.help
+        exit
+    end
+    opt.on('-v','--verbose','set verbose') do
+        o.verbose = true end
+    opt.on('-V','--version','print version and exit') do
+        puts Version
+        exit
+    end
     opt.parse!
   end or quit("Error parsing options",1)
   o.args = ARGV
@@ -156,4 +192,30 @@ else
   data = o.args
   data.empty? && !o.column and quit("You forgot to set the --column option",0)
 end
-data.grubbs(o.level,o.pair,o.cycles,o.verbose ? 2 : 1)
+data.grubbs(o.level,o.pair,o.cycles,o.verbose ? 2 : 1, o.nlimit)
+__END__
+% @m = "lowest (-100) is not an outlier at the 10% level:"
+% @l,@c,@p,@n = 10,1,false,14
+% @a = "0 138 109 127 127 78 92 144 110 95 47 77 62 47 78 -32 -64 0 95 96 -48 -32 -100 -31 -64 -31 -17 0 -16 -48 -31 -16 -15 0 67 -63 -63 -78 15 47 -47 -16 63 15 -48 0 -49 -16 46"
+% pr
+%
+% @m = "highest two (855 and 933) aren't outliers:"
+% @p = true
+% @a = "510 739 397 435 663 473 548 285 586 473 663 816 701 248 322 548 510 739 624 473 816 510 548 435 701 663 548 855 586 248 548 548 586 473 778 397 360 739 933 663 548 701 248 548 701 586 778 739 473"
+% pr
+%
+% @m = "the highest (596) is an outlier at the 5% level:"
+% @l,@p = 5,false; @a = "568 570 570 570 572 572 572 578 584 596"
+% pr
+%
+% @m = "the highest (596) is not an outlier at the 1% level:"
+% @l = 1
+% pr
+%
+% @m = "the highest two (584 and 596) lie out as a pair at the 1% level\nhowever, the routine requires at least 14 observations:"
+% @p = true
+% pr
+%
+% @m = "so let's set the limit to 10 observations:"
+% @n = 10
+% pr
