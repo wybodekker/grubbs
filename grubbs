@@ -52,16 +52,16 @@ The exit value of the script is the number of outliers found or, in case of a le
 error, 100.
 
 === Options
-<tt>--level=<i>float</i></tt>::
+<tt>--level=</tt><i>float</i>::
   percent confidence level for outlier testing; default: 5;
   the only values allowed are 0.1, 0.5, 1, 2.5, 5, and 10.
-<tt>--column=<i>int</i></tt>::
+<tt>--column=</tt><i>int</i>::
   without this option, data to be tested are read from the command line.
   If the option is used, data are expected on standard input,
   and _int_ is the column number of that file to be tested,
   where column 1 is the first column.
   Columns must be separated by any amount of whitespace.
-<tt>--cycles=<i>int</i></tt>::
+<tt>--cycles=</tt><i>int</i>::
   the number of times (default: 1) the data are cycled through the outlier detector
 <tt>--pair</tt>::
   test lowest and highest pairs (default: false).
