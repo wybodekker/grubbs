@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-=begin rdoc
+<<RDOC
 == grubbs - detect outliers in a row or column of data
 === Synopsis
     grubbs [options] [filename|values]
@@ -52,31 +52,31 @@ The exit value of the script is the number of outliers found or, in case of a le
 error, 100.
 
 === Options
-<tt>--level=</tt><i>float</i>::
+[--level=_float_]
   percent confidence level for outlier testing; default: 5;
   the only values allowed are 0.1, 0.5, 1, 2.5, 5, and 10.
-<tt>--column=</tt><i>int</i>::
+[--column=_int_]
   without this option, data to be tested are read from the command line.
   If the option is used, data are expected on standard input,
   and _int_ is the column number of that file to be tested,
   where column 1 is the first column.
   Columns must be separated by any amount of whitespace.
-<tt>--cycles=</tt><i>int</i>::
+[--cycles=_int_]
   the number of times (default: 1) the data are cycled through the outlier detector
-<tt>--pair</tt>::
+[--pair]
   test lowest and highest pairs (default: false).
-<tt>--nlimit</tt>::
+[--nlimit]
   minimum number of observations for pair detection
-<tt>--test</tt>::
+[--test]
   runs the script with various tests taken from Grubbs and Beck's publications and then exits
-<tt>--verbose</tt>::
+[--verbose]
   higher values show more intermediate results. Experts only. Possible values:
   0:: show result only
   1:: show data and options used 
   2:: show intermediate results for each cycle
-<tt>--version</tt>::
+[--version]
   prints the script's version, then exits.
-<tt>--help</tt>::
+[--help]
   prints a summary of usage and options, then exits.
 
 === Examples
@@ -131,7 +131,7 @@ error, 100.
 === CVS
 $Id$
 
-=end
+RDOC
 
 begin
   require 'scriptingutils'
