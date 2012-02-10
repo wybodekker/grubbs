@@ -138,15 +138,8 @@ begin
 rescue LoadError
   raise LoadError,<<EOF,['scriptingutils.rb']
 \n    You probably did not install scriptingutils.rb. 
-    This module is included in #{File.basename($0)}'s distribution
-    and can also be found here: 
-    http://www.dekkerdocumenten.nl/scripts/scriptingutils.rb
-    It must be placed in one of the directories where Ruby looks for it.
-    Currently, those are:
-    #{$LOAD_PATH.join("   \n    ")}
-    but you can add directories by defining or extending the RUBYLIB 
-    environment variable; you could, for example, put this in your .bashrc:
-    export RUBYLIB=~/ruby:/local/ruby
+    This gem is included in #{File.basename($0)}'s distribution
+    Install with: sudo gem install scriptingutils-x.y.z.gem
 EOF
 end
 require 'ringstats'
