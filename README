@@ -1,0 +1,128 @@
+== grubbs - detect outliers in a row or column of data
+=== Synopsis
+    grubbs [options] [filename|values]
+
+    Options:
+    -l, --level=FLOAT       set percent confidence level to FLOAT [5]
+    -c, --cycles=INT        set number of cycles to INT [1]
+    -p, --pair              if no outliers are found, test lowest and highest pairs [false]
+    -n, --nlimit=INT        minimum number of observations for pair detection [14]
+    -k, --column=INT        read data in columns and find outliers in column INT
+    -t, --test              run the examples from Grubbs and Beck's publication and exit
+    -h, --help              print this help and exit
+    -v, --verbose=INT       set verbosity to INT [0]
+    -V, --version           print version and exit
+
+Note::
+  negative numbers are interpreted as options (and therefore leads to an error message);
+  this can be prevented by using -- as the last option.
+Note::
+  long options and their arguments can be separated by either an = or a space;
+  short options must be separated from their arguments with any amount of white space,
+  including none.
+
+=== Description
+*grubbs* is a driver for the _grubbs_ routine in <i>ringstats.rb</i>; It
+detects outliers in either a row of data given on the command line or in
+one of the columns of a datafile. The file may contain one to many columns.
+If neither a filename nor commandline arguments are given, data columns are
+expected on standard input and the <tt>--column</tt> option must be used.
+
+The data may contain numbers in any format, as well as any non-numerical
+words or words consisting of numbers and non-numerical characters; however,
+words that are not fully numerical are simply skipped.
+
+The output of grubbs is a line telling index numbers (first=1) and values of the outliers.
+For example:
+
+    $ grubbs 2 3 2 3 2 4 2 3 2 3 5.1 5.2 2 3 2 3 2 
+    outliers: none
+    $ grubbs 2 3 2 3 2 4 2 3 2 3 5.1 5.2 2 3 2 3 2 --pair
+    outliers: 11 => 5.1, 12 => 5.2
+
+When the <tt>--pair</tt> option is not used, the script (as well as the
+underlying routine) finds at most one outlier per cycle.
+With the  <tt>--pair</tt> option two outliers may be found per cycle. 
+
+=== Exit value
+The exit value of the script is the number of outliers found or, in case of a lethal 
+error, 100.
+
+=== Options
+[--level=_float_]
+  percent confidence level for outlier testing; default: 5;
+  the only values allowed are 0.1, 0.5, 1, 2.5, 5, and 10.
+[--column=_int_]
+  without this option, data to be tested are read from the command line.
+  If the option is used, data are expected on standard input,
+  and _int_ is the column number of that file to be tested,
+  where column 1 is the first column.
+  Columns must be separated by any amount of whitespace.
+[--cycles=_int_]
+  the number of times (default: 1) the data are cycled through the outlier detector
+[--pair]
+  test lowest and highest pairs (default: false).
+[--nlimit]
+  minimum number of observations for pair detection
+[--test]
+  runs the script with various tests taken from Grubbs and Beck's publications and then exits
+[--verbose]
+  higher values show more intermediate results. Experts only. Possible values:
+  0:: show result only
+  1:: show data and options used 
+  2:: show intermediate results for each cycle
+[--version]
+  prints the script's version, then exits.
+[--help]
+  prints a summary of usage and options, then exits.
+
+=== Examples
+
+    $ grubbs --pair 2 3 2 600 2 300 2 3 3 2 2 4 3 2 4 3 3 2 3 2
+    outliers: 4 => 600
+
+    $ grubbs --pair 2 3 2 600 2 300 2 3 3 2 2 4 3 2 4 3 3 2 3 2
+    outliers: 4 => 600
+
+    $ grubbs --cy=2 2 3 2 600 2 300 2 3 3 2 2 4 3 2 4 3 3 2 3 2
+    outliers: 4 => 600, 6 => 300
+
+    $ grubbs 2 3 2 6 2 6 2 3 3 2 2 4 3 2 4 3 3 2 3 2
+    outliers: none
+
+    $ grubbs --pair 2 3 2 6 2 6 2 3 3 2 2 4 3 2 4 3 3 2 3 2
+    outliers: 6 => 6, 4 => 6
+
+    $ cat test
+    16          16      16
+    12.4        12.4    12.4
+    18.5        18.5    18.5
+    18.2        18.2    18.2
+    30.0        131.0   133.0
+    30.0        132.0   134.0
+    21.8        21.8    21.8
+    20.7        20.7    20.7
+    20.5        20.5    20.5
+    21.5        21.5    21.5
+    23.4        23.4    23.4
+    12.5        12.5
+    16.0        16.0
+    19.0        19.0
+    17.0        17.0
+    13.4        13.4
+    22.8        22.8
+    20.1        20.1
+    14.5        14.5
+    14.4        14.4
+    19.8        19.8
+    18.5        18.5
+    11.3        11.3
+    $ grubbs --cy=2 -k 2 test
+        outliers: 6 => 132.0, 5 => 131.0
+    $ grubbs --cycles=2 --column=1 test
+    outliers: none
+    $ grubbs --pair -k 3 test
+    grubbs: n (11) < 14 - pair testing skipped
+    outliers: none
+
+$Id$
