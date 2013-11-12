@@ -1,35 +1,36 @@
 #!/usr/bin/env ruby
+# vim: ts=18
 
-<<RDOC
-== grubbs - detect outliers in a row or column of data
-=== Synopsis
-    grubbs [options] [filename|values]
+<<'DOC'
+= grubbs - detect outliers in a row or column of data
+= Synopsis
+grubbs [options] [filename|values]
 
-    Options:
-    -l, --level=FLOAT       set percent confidence level to FLOAT [5]
-    -c, --cycles=INT        set number of cycles to INT [1]
-    -p, --pair              if no outliers are found, test lowest and highest pairs [false]
-    -n, --nlimit=INT        minimum number of observations for pair detection [14]
-    -k, --column=INT        read data in columns and find outliers in column INT
-    -t, --test              run the examples from Grubbs and Beck's publication and exit
-    -h, --help              print this help and exit
-    -v, --verbose=INT       set verbosity to INT [0]
-    -V, --version           print version and exit
+Options:
+-l, --level=FLOAT	set percent confidence level to FLOAT [5]
+-c, --cycles=INT	set number of cycles to INT [1]
+-p, --pair	if no outliers are found, test lowest and highest pairs [false]
+-n, --nlimit=INT	minimum number of observations for pair detection [14]
+-k, --column=INT	read data in columns and find outliers in column INT
+-t, --test	run the examples from Grubbs and Beck's publication and exit
+-h, --help	print this help and exit
+-v, --verbose=INT	set verbosity to INT [0]
+-V, --version	print version and exit
 
-Note::
-  negative numbers are interpreted as options (and therefore leads to an error message);
+Notes
+- negative numbers are interpreted as options (and therefore leads to an error message);
   this can be prevented by using -- as the last option.
-Note::
-  long options and their arguments can be separated by either an = or a space;
+  
+- long options and their arguments can be separated by either an = or a space;
   short options must be separated from their arguments with any amount of white space,
   including none.
 
-=== Description
-*grubbs* is a driver for the _grubbs_ routine in <i>ringstats.rb</i>; It
+= Description
+grubbs is a driver for the |grubbs| routine in |ringstats.rb|; It
 detects outliers in either a row of data given on the command line or in
 one of the columns of a datafile. The file may contain one to many columns.
 If neither a filename nor commandline arguments are given, data columns are
-expected on standard input and the <tt>--column</tt> option must be used.
+expected on standard input and the |--column| option must be used.
 
 The data may contain numbers in any format, as well as any non-numerical
 words or words consisting of numbers and non-numerical characters; however,
@@ -43,43 +44,34 @@ For example:
     $ grubbs 2 3 2 3 2 4 2 3 2 3 5.1 5.2 2 3 2 3 2 --pair
     outliers: 11 => 5.1, 12 => 5.2
 
-When the <tt>--pair</tt> option is not used, the script (as well as the
+When the |--pair| option is not used, the script (as well as the
 underlying routine) finds at most one outlier per cycle.
-With the  <tt>--pair</tt> option two outliers may be found per cycle. 
+With the  |--pair| option two outliers may be found per cycle. 
 
-=== Exit value
+= Exit value
 The exit value of the script is the number of outliers found or, in case of a lethal 
 error, 100.
 
-=== Options
-[--level=_float_]
-  percent confidence level for outlier testing; default: 5;
-  the only values allowed are 0.1, 0.5, 1, 2.5, 5, and 10.
-[--column=_int_]
-  without this option, data to be tested are read from the command line.
-  If the option is used, data are expected on standard input,
-  and _int_ is the column number of that file to be tested,
-  where column 1 is the first column.
-  Columns must be separated by any amount of whitespace.
-[--cycles=_int_]
-  the number of times (default: 1) the data are cycled through the outlier detector
-[--pair]
-  test lowest and highest pairs (default: false).
-[--nlimit]
-  minimum number of observations for pair detection
-[--test]
-  runs the script with various tests taken from Grubbs and Beck's publications and then exits
-[--verbose]
-  higher values show more intermediate results. Experts only. Possible values:
-  0:: show result only
-  1:: show data and options used 
-  2:: show intermediate results for each cycle
-[--version]
-  prints the script's version, then exits.
-[--help]
-  prints a summary of usage and options, then exits.
+= Options
+--level=float	percent confidence level for outlier testing; default: 5;
+	the only values allowed are 0.1, 0.5, 1, 2.5, 5, and 10.
+--column=int	without this option, data to be tested are read from the command line.
+	If the option is used, data are expected on standard input,
+	and |int| is the column number of that file to be tested,
+	where column 1 is the first column.
+	Columns must be separated by any amount of whitespace.
+--cycles=int	the number of times (default: 1) the data are cycled through the outlier detector
+--pair	test lowest and highest pairs (default: false).
+--nlimit	minimum number of observations for pair detection
+--test	runs the script with various tests taken from Grubbs and Beck's publications and then exits
+--verbose	higher values show more intermediate results. Experts only. Possible values:
+	0: show result only
+	1: show data and options used 
+	2: show intermediate results for each cycle
+--version	prints the script's version, then exits.
+--help	prints a summary of usage and options, then exits.
 
-=== Examples
+= Examples
 
     $ grubbs --pair 2 3 2 600 2 300 2 3 3 2 2 4 3 2 4 3 3 2 3 2
     outliers: 4 => 600
@@ -127,11 +119,7 @@ error, 100.
     $ grubbs --pair -k 3 test
     grubbs: n (11) < 14 - pair testing skipped
     outliers: none
-
-=== CVS
-$Id$
-
-RDOC
+DOC
 
 begin
   require 'scriptingutils'
@@ -145,7 +133,7 @@ end
 require 'ringstats'
 require 'erb'
 
-Version = 1.1
+VERSION = "1.02"
 
 def handle_options
   o = OpenStruct.new( 
@@ -156,7 +144,7 @@ def handle_options
     :test      => false,
     :verbose   => 0,
     :column    => nil,
-    :version   => Version
+    :version   => VERSION
   )
   ARGV.options do |opt|
     opt.banner =  "#{MYNAME} - detect outliers in a row or column of data\n"
@@ -194,6 +182,10 @@ def handle_options
     opt.on('-V','--version','print version and exit') do
         puts Version
         exit
+    end
+    opt.on('-I','internal use only') do
+      system("instscript #{MYNAME}")
+      exit 0
     end
     opt.parse!
   end or quit("Error parsing options",1)
