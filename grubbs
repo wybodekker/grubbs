@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 # vim: ts=18
 
+Version = "1.02"
+
 <<'DOC'
 = grubbs - detect outliers in a row or column of data
 = Synopsis
@@ -121,20 +123,9 @@ error, 100.
     outliers: none
 DOC
 
-begin
-  require 'scriptingutils'
-rescue LoadError
-  raise LoadError,<<EOF,['scriptingutils.rb']
-\n    You probably did not install scriptingutils.rb. 
-    This gem is included in #{File.basename($0)}'s distribution
-    Install with: sudo gem install scriptingutils-x.y.z.gem
-EOF
-end
 require 'ringstats'
 require 'erb'
-
-VERSION = "1.02"
-
+ 
 def handle_options
   o = OpenStruct.new( 
     :pair      => false,
@@ -144,7 +135,7 @@ def handle_options
     :test      => false,
     :verbose   => 0,
     :column    => nil,
-    :version   => VERSION
+    :version   => Version
   )
   ARGV.options do |opt|
     opt.banner =  "#{MYNAME} - detect outliers in a row or column of data\n"
@@ -188,7 +179,7 @@ def handle_options
       exit 0
     end
     opt.parse!
-  end or quit("Error parsing options",1)
+  end or quit("Error parsing options")
   o.args = ARGV
   o
 end
@@ -202,7 +193,7 @@ if o.column
   end
 else 
   data = o.args
-  data.empty? && !o.column and quit("You forgot to set the --column option",0)
+  data.empty? && !o.column and quit("You forgot to set the --column option")
 end
 exit(data.grubbs(o.level,o.pair,o.cycles,o.verbose+1,o.nlimit).size)
 __END__
