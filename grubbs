@@ -174,10 +174,7 @@ def handle_options
         puts Version
         exit
     end
-    opt.on('-I','internal use only') do
-      system("instscript #{MYNAME}")
-      exit 0
-    end
+    opt.on('-I') do system("instscript #{MYNAME}"); exit; end
     opt.parse!
   end or quit("Error parsing options")
   o.args = ARGV
