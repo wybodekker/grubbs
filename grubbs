@@ -164,7 +164,7 @@ def handle_options
         exit
     end
     opt.on('-h','--help','print this help and exit') do
-        puts opt.help
+        puts opt.to_s.sub(/^ *-I\n/,'')
         exit
     end
     opt.on('-v','--verbose=INT','set verbosity to INT; default: 0') do |v|
