@@ -6,24 +6,24 @@ routines als Ring en RingS.
 Het is te vinden op mijn website. Het is daar niet geindexeerd, dus je moet
 weten dat het daar onder ring staat.
 Het script zelf vind je onder de naam, de documentatie staat onder het groene
-boekje, en deze video staat hier onder het video-icoontje. Kijk vooral even hier 
+boekje, en deze video staat hier onder het video-icoontje. Kijk vooral even hier
 voor instructies voor het bekijken van de video!
 
 Deze browser kan nu wel weg en we zien daarna een leeg scherm. Daarin starten
 we een terminal op en we runnen grubbs op de commandline met de --help  (of -h)
-optie. 
+optie.
 
 grubbs - detect outliers in a row or column of data
 Usage: grubbs [options] [filename]
-    -l, --level=FLOAT                set percent confidence level to FLOAT [5]
-    -c, --cycles=INT                 set number of cycles to INT [1]
-    -p, --pair                       if no outliers are found, test lowest and highest pairs [false]
-    -n, --nlimit=INT                 minimum number of observations for pair detection [14]
-    -k, --column=INT                 read data in columns and find outliers in column INT
-    -t, --test                       run the examples from Grubbs and Beck's publication and exit
-    -h, --help                       print this help and exit
-    -v, --verbose=INT                set verbosity to INT; default: 0
-    -V, --version                    print version and exit
+    -l,--level=FLOAT                set percent confidence level to FLOAT [5]
+    -c,--cycles=INT                 set number of cycles to INT [1]
+    -p,--pair                       if no outliers are found, test lowest and highest pairs [false]
+    -n,--nlimit=INT                 minimum number of observations for pair detection [14]
+    -k,--column=INT                 read data in columns and find outliers in column INT
+    -t,--test                       run the examples from Grubbs and Beck's publication and exit
+    -h,--help                       print this help and exit
+    -v,--verbose=INT                set verbosity to INT; default: 0
+    -V,--version                    print version and exit
 
 We zien dan wat het script doet, en wat de opties zijn. Deze belangrijkste daaarvan
 komen wel bekend voor als parameters die ook in Ring en in RingS gezet kunnen
@@ -32,37 +32,37 @@ level voor het betrouwbaarheidsniveau
 cycles voor het aantal uitbijters dat gezocht wordt
 pair voor paarsgewijze uitbijterdetectie
 
-zonder de --column-optie verwacht het script de getallen op de commandline, 
+zonder de --column-optie verwacht het script de getallen op de commandline,
 met die optie worden data in kolommen verwacht, die van een file kunnen komen,
 of op standaard-input kunnen worden getypt, gewoonlijk door middel van knippen
 en plakken zoals we straks zullen zien.
 
 Laten we beginnen met wat voorbeelden met data op de commandline:
 
-grubbs 2 3 2 3              
+grubbs 2 3 2 3
 
 we krijgen dan te maken met een van de beperkingen die grubbs stelt aan het
-minimum aantal waarnemingen: het moeten er minstens 5 zijn. We voegen dus wat getallen to: 
+minimum aantal waarnemingen: het moeten er minstens 5 zijn. We voegen dus wat getallen to:
 pijltje omhoog haalt de vorige commandline terug, en we typen er wat getallen achter:
 
-grubbs 2 3 2 3 2 2 3        
+grubbs 2 3 2 3 2 2 3
 
 zoals verwacht: geen uitbijter. Voegen we een groot getal toe om wel een uitbijter te vinden:
 
-grubbs 2 3 2 3 2 2 3 33       
+grubbs 2 3 2 3 2 2 3 33
 
 dan vinden we die inderdaad. Met nog een soortgelijk getal erbij vinden we
 geen uitbijters meer, omdat het andere grote getall de standaarddeviatie
 hoog blijft houden:
 
-grubbs 2 3 2 3 2 2 3 33 35     
+grubbs 2 3 2 3 2 2 3 33 35
 
 pas als het tweede grote getal véél groter is dan het eerste wordt het
 als uitbijter gevonden:
 
-grubbs 2 3 2 3 2 2 3 33 333      
+grubbs 2 3 2 3 2 2 3 33 333
 
-In de resterende getallen is 33 dan nog steeds een uitbijter, zoals we eerder gezien hebben, maar het wordt niet gevonden, omdat we maar één cycle toestaan, en per cycle wordt maar één uitbijter gezocht. 
+In de resterende getallen is 33 dan nog steeds een uitbijter, zoals we eerder gezien hebben, maar het wordt niet gevonden, omdat we maar één cycle toestaan, en per cycle wordt maar één uitbijter gezocht.
 Wanneer we de optie cycles op 2 zetten komen ze er beide uit:
 
 grubbs 2 3 2 3 2 2 3 33 333 --cycles=2
@@ -85,7 +85,7 @@ optie pas effect te krijgen:
 
 grubbs 2 3 2 3 2 2 3 33 35 --pair --nlimit=8
 
-Ik heb nu grubbs laten werken met data die op de commandoregel worden meegegeven. 
+Ik heb nu grubbs laten werken met data die op de commandoregel worden meegegeven.
 Maar vaak zijn ze in kolommen beschikbaar: denk bijvoorbeeld aan data.txt files die als invoer voor Ring gebruikt worden:
 
 
@@ -100,5 +100,3 @@ grubbs -t (roept zichzelf 6x aan)
 
 laatste van die 6 op de commandline:
 grubbs -p -l 1 -n 10 568 570 570 570 572 572 572 578 584 596
-
-$Id$
