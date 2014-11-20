@@ -174,7 +174,7 @@ def handle_options
         puts Version
         exit
     end
-    opt.on('-I') do system("instscript #{MYNAME}"); exit; end
+    opt.on('-I') do system("instscript --markdown #{MYNAME}"); exit; end
     opt.parse!
   end or quit("Error parsing options")
   o.args = ARGV
