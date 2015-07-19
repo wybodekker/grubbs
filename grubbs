@@ -2,7 +2,7 @@
 # encoding: utf-8
 # vim: ts=18
 
-Version = "1.02"
+Version = "1.03"
 
 <<'DOC'
 = grubbs - detect outliers in a row or column of data
