@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
 # encoding: utf-8
-# vim: ts=18
 
 Version = "1.03"
 
@@ -11,14 +10,14 @@ grubbs [options] [filename|values]
 
 Options:
 -l,--level=FLOAT	set percent confidence level to FLOAT [5]
--c,--cycles=INT	set number of cycles to INT [1]
--p,--pair	if no outliers are found, test lowest and highest pairs [false]
--n,--nlimit=INT	minimum number of observations for pair detection [14]
--k,--column=INT	read data in columns and find outliers in column INT
--t,--test	run the examples from Grubbs and Beck's publication and exit
--h,--help	print this help and exit
+-c,--cycles=INT		set number of cycles to INT [1]
+-p,--pair		if no outliers are found, test lowest and highest pairs [false]
+-n,--nlimit=INT		minimum number of observations for pair detection [14]
+-k,--column=INT		read data in columns and find outliers in column INT
+-t,--test		run the examples from Grubbs and Beck's publication and exit
+-h,--help		print this help and exit
 -v,--verbose=INT	set verbosity to INT [0]
--V,--version	print version and exit
+-V,--version		print version and exit
 
 Notes
 - negative numbers are interpreted as options (and therefore leads to an error message);
