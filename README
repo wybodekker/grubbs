@@ -5,7 +5,7 @@
  author:| Wybo Dekker
   email:| wybo@dekkerdocumenten.nl
 version:| 1.03
-license:| Released under the GNU General Public License
+license:| GNU General Public License
 
 grubbs is a driver for the grubbs routine in ringstats.rb; It
 detects outliers in either a row of data given on the command line or in

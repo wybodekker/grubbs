@@ -8,7 +8,7 @@ Version = "1.03"
 = Synopsis
 grubbs [options] [filename|values]
 
-Options:
+= Options
 -l,--level=FLOAT	set percent confidence level to FLOAT [5]
 -c,--cycles=INT		set number of cycles to INT [1]
 -p,--pair		if no outliers are found, test lowest and highest pairs [false]
@@ -122,10 +122,11 @@ error, 100.
     grubbs: n (11) < 14 - pair testing skipped
     outliers: none
 
-= Author and copyright
-Author	Wybo Dekker
-Email	U{wybo@dekkerdocumenten.nl}{wybo@dekkerdocumenten.nl}
-License	Released under the U{www.gnu.org/copyleft/gpl.html}{GNU General Public License}
+= Author
+[Wybo Dekker](wybo@dekkerdocumenten.nl)
+
+= Copyright
+Released under the [GNU General Public License](www.gnu.org/copyleft/gpl.html)
 DOC
 
 require 'ringstats'
