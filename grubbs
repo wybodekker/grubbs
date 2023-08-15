@@ -1,8 +1,10 @@
 #!/usr/bin/env ruby
 # encoding: utf-8
 
-Version = "1.03"
+Version = "1.04"
+Myname = File.basename($0)
 
+Help =
 <<'DOC'
 = grubbs - detect outliers in a row or column of data
 = Synopsis
@@ -20,25 +22,27 @@ grubbs [options] [filename|values]
 -V,--version		print version and exit
 
 Notes
-- negative numbers are interpreted as options (and therefore leads to an error message);
-  this can be prevented by using -- as the last option.
-  
-- long options and their arguments can be separated by either an = or a space;
-  short options must be separated from their arguments with any amount of white space,
-  including none.
+- negative numbers are interpreted as options (and therefore leads to an
+  error message); this can be prevented by using -- as the last option.
+
+- long options and their arguments can be separated by either an = or a
+  space; short options must be separated from their arguments with any
+  amount of white space, including none.
 
 = Description
-grubbs is a driver for the |grubbs| routine in |ringstats.rb|; It
-detects outliers in either a row of data given on the command line or in
-one of the columns of a datafile. The file may contain one to many columns.
-If neither a filename nor commandline arguments are given, data columns are
-expected on standard input and the |--column| option must be used.
+grubbs is a driver for the |grubbs| routine in |ringstats.rb|; It detects
+outliers in either a row of data given on the command line or in one of the
+columns of a datafile. The file may contain one to many columns. If neither
+a filename nor commandline arguments are given, data columns are expected
+on standard input and the |--column| option must be used.
 
 The data may contain numbers in any format, as well as any non-numerical
 words or words consisting of numbers and non-numerical characters; however,
 words that are not fully numerical are simply skipped.
 
-The output of grubbs is a line telling index numbers (first=1) and values of the outliers.
+The output of grubbs is a line telling index numbers (first=1) and values
+of the outliers.
+
 For example:
 
     $ grubbs 2 3 2 3 2 4 2 3 2 3 5.1 5.2 2 3 2 3 2 
@@ -48,30 +52,34 @@ For example:
 
 When the |--pair| option is not used, the script (as well as the
 underlying routine) finds at most one outlier per cycle.
-With the  |--pair| option two outliers may be found per cycle. 
+With the |--pair| option two outliers may be found per cycle.
 
 = Exit value
-The exit value of the script is the number of outliers found or, in case of a lethal 
-error, 100.
+The exit value of the script is the number of outliers found or, in case of
+a lethal error, 100.
 
 = Options
 --level=float	percent confidence level for outlier testing; default: 5;
-	the only values allowed are 0.1, 0.5, 1, 2.5, 5, and 10.
---column=int	without this option, data to be tested are read from the command line.
-	If the option is used, data are expected on standard input,
-	and |int| is the column number of that file to be tested,
-	where column 1 is the first column.
-	Columns must be separated by any amount of whitespace.
---cycles=int	the number of times (default: 1) the data are cycled through the outlier detector
---pair	test lowest and highest pairs (default: false).
+		the only values allowed are 0.1, 0.5, 1, 2.5, 5, and 10.
+--column=int	without this option, data to be tested are read from the
+		command line.
+		If the option is used, data are expected on standard input,
+		and |int| is the column number of that file to be tested,
+		where column 1 is the first column.
+		Columns must be separated by any amount of whitespace.
+--cycles=int	the number of times (default: 1) the data are cycled through
+		the outlier detector
+--pair		test lowest and highest pairs (default: false).
 --nlimit	minimum number of observations for pair detection
---test	runs the script with various tests taken from Grubbs and Beck's publications and then exits
---verbose	higher values show more intermediate results. Experts only. Possible values:
-	0: show result only
-	1: show data and options used 
-	2: show intermediate results for each cycle
+--test		runs the script with various tests taken from Grubbs and
+		Beck‘s publications and then exits
+--verbose	higher values show more intermediate results. Experts only.
+		Possible values:
+		0: show result only
+		1: show data and options used
+		2: show intermediate results for each cycle
 --version	prints the script's version, then exits.
---help	prints a summary of usage and options, then exits.
+--help		prints a summary of usage and options, then exits.
 
 = Examples
 
@@ -131,74 +139,101 @@ DOC
 
 require 'ringstats'
 require 'erb'
- 
-def handle_options
-  o = OpenStruct.new( 
-    :pair      => false,
-    :nlimit    => 14,
-    :level     => 5,
-    :cycles    => 1,
-    :test      => false,
-    :verbose   => 0,
-    :column    => nil,
-    :version   => Version
-  )
-  ARGV.options do |opt|
-    opt.banner =  "#{MYNAME} - detect outliers in a row or column of data\n"
-    opt.banner << "Usage: #{MYNAME} [options] [filename]"
-  
-    opt.on('-l','--level=FLOAT',Float,'set percent confidence level to FLOAT [5]') do |v|
-      o.level = v
-    end
-    opt.on('-c','--cycles=INT',Integer,'set number of cycles to INT [1]') do |v|
-        o.cycles = v
-    end
-    opt.on('-p','--pair','if no outliers are found, test lowest and highest pairs [false]') do
-        o.pair = true
-    end
-    opt.on('-n','--nlimit=INT',Integer,'minimum number of observations for pair detection [14]') do |v|
-        o.nlimit = v
-    end
-    opt.on('-k','--column=INT',Integer,'read data in columns and find outliers in column INT') do |v|
-        o.column = v-1
-    end
-    opt.on('-t','--test',"run the examples from Grubbs and Beck's publication and exit") do
-        def pr
-          puts('-'*40,@m,sys($0 + " -v 1 -l #{@l} -c #{@c} -n #{@n} #{@p ? '-p' : ''} -- " + @a).output)
-        end
-        puts ERB.new(DATA.read,nil,'%').result(binding)
-        exit
-    end
-    opt.on('-h','--help','print this help and exit') do
-        puts opt.to_s.sub(/^ *-I\n/,'')
-        exit
-    end
-    opt.on('-v','--verbose=INT','set verbosity to INT; default: 0') do |v|
-        o.verbose = v.to_i
-    end
-    opt.on('-V','--version','print version and exit') do
-        puts Version
-        exit
-    end
-    opt.on('-I') do system("instscript --markdown #{MYNAME}"); exit; end
-    opt.parse!
-  end or quit("Error parsing options")
-  o.args = ARGV
-  o
+require 'ostruct'
+require 'colorize'
+
+$o = OpenStruct.new(
+  :pair      => false,
+  :nlimit    => 14,
+  :level     => 5,
+  :cycles    => 1,
+  :test      => false,
+  :verbose   => 0,
+  :column    => nil,
+  :version   => Version
+)
+
+OptionParser.new(
+   banner = <<~EOD,
+	#{MYNAME} - detect outliers in a row or column of data\n	
+	Usage: #{MYNAME} [options] [filename]\n	
+	Options:
+	EOD
+   width = 18,
+   indent = ''
+) do |opts|
+
+   opts.on('-l','--level=FLOAT',Float,
+      'set percent confidence level to FLOAT [5]'
+   ) do |v|
+     $o.level = v
+   end
+   opts.on('-c','--cycles=INT',Integer,
+      'set number of cycles to INT [1]'
+   ) do |v|
+       $o.cycles = v
+   end
+   opts.on('-p','--pair',
+      'if no outliers are found, test lowest and highest pairs [false]'
+   ) do
+       $o.pair = true
+   end
+   opts.on('-n','--nlimit=INT',Integer,
+      'minimum number of observations for pair detection [14]'
+   ) do |v|
+       $o.nlimit = v
+   end
+   opts.on('-k','--column=INT',Integer,
+      'read data in columns and find outliers in column INT'
+   ) do |v|
+      $o.column = v-1
+   end
+   opts.on('-t','--test',
+      "run the examples from Grubbs and Beck's publication and exit"
+   ) do
+      def pr
+         puts('-'*63,@m,sys($0 + " -v 1 -l #{@l} -c #{@c} -n #{@n} #{@p ? '-p' : ''} -- " + @a).output)
+      end
+      puts ERB.new(DATA.read,trim_mode:'%').result(binding)
+      exit
+   end
+   opts.on('-h','--help',
+      'print this help and exit'
+   ) do
+      puts opts.to_s.sub(/^ *-I\n/,'')
+      exit
+   end
+   opts.on('-v','--verbose=INT',
+      'set verbosity to INT; default: 0'
+   ) do |v|
+      $o.verbose = v.to_i
+   end
+   opts.on('-V','--version',
+      'print version and exit'
+   ) do
+      puts Version
+      exit
+   end
+  opts.on('-I','—') do                                                                    
+      system("instscript #{Myname}") or
+         die 'the -I option is for developers only'
+      exit
+   end
+   opts.parse!
 end
-o = init(nil,:handle_options)
+
 stat_conf(STAT_SILENT,STAT_SILENT,STAT_SKIP)
 
-if o.column
-  data = []
-  readlines.each do |l|
-    data.push(l.chomp.split("\t")[o.column])
-  end
+if $o.column
+   data = []
+   readlines.each do |l|
+      data.push(l.chomp.split("\t")[$o.column])
+   end
 else 
-  data = o.args
-  data.empty? && !o.column and quit("You forgot to set the --column option")
+   data = ARGV
+   data.empty? && !$o.column and quit("You forgot to set the --column option")
 end
-exit(data.grubbs(o.level,o.pair,o.cycles,o.verbose+1,o.nlimit).size)
+exit(data.grubbs($o.level,$o.pair,$o.cycles,$o.verbose+1,$o.nlimit).size)
 __END__
 % @m = "lowest (-100) is not an outlier at the 10% level:"
 % @l,@c,@p,@n = 10,1,false,14
@@ -211,14 +246,16 @@ __END__
 % pr
 %
 % @m = "the highest (596) is an outlier at the 5% level:"
-% @l,@p = 5,false; @a = "568 570 570 570 572 572 572 578 584 596"
+% @l,@p = 5,false
+% @a = "568 570 570 570 572 572 572 578 584 596"
 % pr
 %
 % @m = "the highest (596) is not an outlier at the 1% level:"
 % @l = 1
 % pr
 %
-% @m = "the highest two (584 and 596) lie out as a pair at the 1% level\nhowever, the routine requires at least 14 observations:"
+% @m = "the highest two (584 and 596) lie out as a pair at the 1% level
+% 	however, the routine requires at least 14 observations:"
 % @p = true
 % pr
 %
